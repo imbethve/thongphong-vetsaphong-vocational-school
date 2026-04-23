@@ -187,10 +187,14 @@
         /* Decorative circles */
         .hero-bg-video {
             position: absolute;
-            inset: 0;
-            width: 100%; height: 100%;
-            object-fit: cover;
-            object-position: center;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            /* always cover the hero regardless of viewport ratio */
+            width: 100vw;
+            height: 56.25vw;   /* 16:9 at full width */
+            min-height: 100%;
+            min-width: 177.78vh; /* 16:9 at full height */
+            border: none;
             z-index: 0;
             pointer-events: none;
         }
@@ -592,7 +596,6 @@
             background: var(--forest);
         }
         .vid-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
-        .vid-wrap video  { width: 100%; height: 100%; object-fit: cover; display: block; }
 
         .chips { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
         .chip {
@@ -749,8 +752,9 @@
 
 <!-- ========== HERO ========== -->
 <section class="hero" id="home">
-    <video class="hero-bg-video" src="media/5200017-uhd_3840_2160_25fps.mp4"
-           autoplay muted loop playsinline preload="auto"></video>
+    <iframe class="hero-bg-video"
+        src="https://www.youtube.com/embed/7plWctsTdGA?autoplay=1&mute=1&loop=1&playlist=7plWctsTdGA&controls=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&playsinline=1"
+        allow="autoplay; encrypted-media" allowfullscreen></iframe>
     <div class="hero-overlay"></div>
     <div class="hero-inner">
 
@@ -888,7 +892,7 @@
                 <div class="card-body" id="body-it">
                     <div class="card-body-inner">
                         <div class="vid-wrap">
-                            <video src="media/5200017-uhd_3840_2160_25fps.mp4" controls preload="none"></video>
+                            <iframe data-src="https://www.youtube.com/embed/7plWctsTdGA" allowfullscreen title="IT Program Preview"></iframe>
                         </div>
                         <div class="chips">
                             <div class="chip">
@@ -926,7 +930,7 @@
                 <div class="card-body" id="body-beauty">
                     <div class="card-body-inner">
                         <div class="vid-wrap">
-                            <video src="media/5427884-uhd_3840_2160_25fps.mp4" controls preload="none"></video>
+                            <iframe data-src="https://www.youtube.com/embed/OPsxJLMejhA" allowfullscreen title="Cosmetology Program Preview"></iframe>
                         </div>
                         <div class="chips">
                             <div class="chip">
@@ -964,7 +968,7 @@
                 <div class="card-body" id="body-elec">
                     <div class="card-body-inner">
                         <div class="vid-wrap">
-                            <video src="media/5200017-uhd_3840_2160_25fps.mp4" controls preload="none"></video>
+                            <iframe data-src="https://www.youtube.com/embed/7plWctsTdGA" allowfullscreen title="Electrical Installation Program Preview"></iframe>
                         </div>
                         <div class="chips">
                             <div class="chip">
@@ -1002,7 +1006,7 @@
                 <div class="card-body" id="body-wood">
                     <div class="card-body-inner">
                         <div class="vid-wrap">
-                            <video src="media/5427884-uhd_3840_2160_25fps.mp4" controls preload="none"></video>
+                            <iframe data-src="https://www.youtube.com/embed/OPsxJLMejhA" allowfullscreen title="Carpentry Program Preview"></iframe>
                         </div>
                         <div class="chips">
                             <div class="chip">
@@ -1232,34 +1236,34 @@ function setLang(l) {
 /* ── CARD TOGGLE ── */
 const open = new Set();
 
+function closeCard(closeId) {
+    const closeCard = document.getElementById('card-' + closeId);
+    const closeBody = document.getElementById('body-' + closeId);
+    const iframe = closeBody.querySelector('iframe');
+    open.delete(closeId);
+    closeCard.classList.remove('expanded');
+    closeBody.classList.remove('open');
+    if (iframe) iframe.src = '';
+}
+
 function toggleCard(id) {
     // Close any currently open card first
-    open.forEach(openId => {
-        if (openId !== id) {
-            const openCard = document.getElementById('card-' + openId);
-            const openBody = document.getElementById('body-' + openId);
-            const openVideo = openBody.querySelector('video');
-            open.delete(openId);
-            openCard.classList.remove('expanded');
-            openBody.classList.remove('open');
-            if (openVideo) { openVideo.pause(); openVideo.currentTime = 0; }
-        }
-    });
+    open.forEach(openId => { if (openId !== id) closeCard(openId); });
 
     const card = document.getElementById('card-' + id);
     const body = document.getElementById('body-' + id);
-    const video = body.querySelector('video');
+    const iframe = body.querySelector('iframe');
 
     if (open.has(id)) {
-        open.delete(id);
-        card.classList.remove('expanded');
-        body.classList.remove('open');
-        if (video) { video.pause(); video.currentTime = 0; }
+        closeCard(id);
     } else {
         open.add(id);
         card.classList.add('expanded');
         body.classList.add('open');
-        if (video) { setTimeout(() => video.play().catch(() => {}), 120); }
+        if (iframe) {
+            const base = iframe.getAttribute('data-src');
+            setTimeout(() => { iframe.src = base + '?autoplay=1&rel=0&modestbranding=1'; }, 120);
+        }
     }
 }
 
